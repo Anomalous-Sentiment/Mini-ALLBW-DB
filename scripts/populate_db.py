@@ -90,8 +90,35 @@ def upsert_into_table(table_name, rows):
     )
     return response
 
-def parse_skill_mst_list(target_dir, filename):
-    pass
+def parse_skill_mst_list(target_dir, filename, dict_of_dicts):
+    parsed_skill_list = []
+    # Get the card mst list
+    skill_list = read_json(target_dir, filename)
+    longest_name = ''
+    longest_desc = ''
+
+    for skill in skill_list:
+        new_row = {}
+        new_row['skill_mst_id'] = skill['skillMstId']
+        new_row['jp_name'] = skill['name']
+        new_row['en_name'] = dict_of_dicts['EN'].get(skill['name'])
+        new_row['cn_name'] = dict_of_dicts['CN'].get(skill['name'])
+        new_row['kr_name'] = dict_of_dicts['KR'].get(skill['name'])
+        new_row['tw_name'] = dict_of_dicts['TW'].get(skill['name'])
+        new_row['jp_description'] = skill['description']
+        new_row['en_description'] = dict_of_dicts['EN'].get(skill['description'])
+        new_row['cn_description'] = dict_of_dicts['CN'].get(skill['description'])
+        new_row['kr_description'] = dict_of_dicts['KR'].get(skill['description'])
+        new_row['tw_description'] = dict_of_dicts['TW'].get(skill['description'])
+        new_row['sp'] = skill['sp']
+        new_row['min_range'] = skill['rangeMinIcon']
+        new_row['max_range'] = skill['rangeMaxIcon']
+        new_row['skill_type'] = skill['type']
+        new_row['effect_time'] = skill['effectTime']
+
+        parsed_skill_list.append(new_row)
+
+    return parsed_skill_list
 
 def generate_unique_cards(parsed_card_mst_list, dict_of_dicts):
     seen_list = []
@@ -109,10 +136,10 @@ def generate_unique_cards(parsed_card_mst_list, dict_of_dicts):
         new_unique_card = {}
         new_unique_card['unique_id'] = card['unique_id']
         new_unique_card['jp_name'] = card['name']
-        new_unique_card['en_name'] = dict_of_dicts['EN'][card['name']]
-        new_unique_card['cn_name'] = dict_of_dicts['CN'][card['name']]
-        new_unique_card['kr_name'] = dict_of_dicts['KR'][card['name']]
-        new_unique_card['tw_name'] = dict_of_dicts['TW'][card['name']]
+        new_unique_card['en_name'] = dict_of_dicts['EN'].get(card['name'])
+        new_unique_card['cn_name'] = dict_of_dicts['CN'].get(card['name'])
+        new_unique_card['kr_name'] = dict_of_dicts['KR'].get(card['name'])
+        new_unique_card['tw_name'] = dict_of_dicts['TW'].get(card['name'])
 
         unique_card_list.append(new_unique_card)
 
@@ -142,14 +169,13 @@ dict_of_dicts['TW'] = tw_dict
 # Generate unique card list
 unique_card_list = generate_unique_cards(parsed_card_list, dict_of_dicts)
 
+# Get parsed mst skill list
+parsed_skill_list = parse_skill_mst_list(mst_dir, 'getSkillMstList.json', dict_of_dicts)
+
 # remove the name key form dicts in the parsed card list
 parsed_card_list = [{k: v for k, v in d.items() if k != 'name'} for d in parsed_card_list]
 
 # Insert into database
 response = upsert_into_table('unique_memoria', unique_card_list)
+response = upsert_into_table('skills', parsed_skill_list)
 response = upsert_into_table('memoria', parsed_card_list)
-
-
-pprint(response)
-pprint(unique_card_list)
-pprint(len(unique_card_list))
