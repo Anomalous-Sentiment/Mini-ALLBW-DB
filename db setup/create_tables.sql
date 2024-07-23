@@ -2,10 +2,11 @@ DROP TABLE IF EXISTS unique_memoria;
 CREATE TABLE unique_memoria
 (
     unique_id INT,
-    jp_name VARCHAR(20),
-    en_name VARCHAR(20),
-    cn_name VARCHAR(20),
-    kr_name VARCHAR(20),
+    jp_name VARCHAR(100),
+    en_name VARCHAR(100),
+    cn_name VARCHAR(100),
+    kr_name VARCHAR(100),
+    tw_name VARCHAR(100),
     PRIMARY KEY (unique_id)
 );
 
@@ -42,10 +43,12 @@ CREATE TABLE skills
     en_name VARCHAR(20),
     cn_name VARCHAR(20),
     kr_name VARCHAR(20),
+    tw_name VARCHAR(20),
     jp_description VARCHAR(50),
     en_description VARCHAR(50),
     cn_description VARCHAR(50),
     kr_description VARCHAR(50),
+    tw_description VARCHAR(50),
     sp SMALLINT,
     min_range SMALLINT,
     max_range SMALLINT,
