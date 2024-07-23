@@ -56,3 +56,20 @@ CREATE TABLE skills
     effect_time SMALLINT,
     PRIMARY KEY (skill_mst_id)
 );
+
+DROP TABLE IF EXISTS skill_types;
+CREATE TABLE skill_types
+(
+    skill_type SMALLINT,
+    skill_type_desc VARCHAR,    
+    PRIMARY KEY (skill_type)
+);
+
+
+DROP TABLE IF EXISTS card_types;
+CREATE TABLE card_types
+(
+    card_type SMALLINT,
+    card_type_name VARCHAR,    
+    PRIMARY KEY (card_type)
+);
