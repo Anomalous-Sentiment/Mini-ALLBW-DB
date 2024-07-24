@@ -96,8 +96,13 @@ def parse_skill_mst_list(target_dir, filename, dict_of_dicts):
     skill_list = read_json(target_dir, filename)
     longest_name = ''
     longest_desc = ''
-
+    # keys = []
     for skill in skill_list:
+        # convert parameterText string to json and get all keys
+        parameter_text_json = json.loads(skill['parameterText'])
+        # get_keys(parameter_text_json, keys)
+        # TARGET_NUM can be either an int, or a json with min and max keys
+
         new_row = {}
         new_row['skill_mst_id'] = skill['skillMstId']
         new_row['jp_name'] = skill['name']
@@ -116,9 +121,82 @@ def parse_skill_mst_list(target_dir, filename, dict_of_dicts):
         new_row['skill_type'] = skill['type']
         new_row['effect_time'] = skill['effectTime']
 
+        new_row['attack_type'] = parameter_text_json.get('ATTACK_TYPE')
+
+        # Check if TARGET_NUM is an int or json obj
+        if isinstance(parameter_text_json.get('TARGET_NUM'), dict):
+            new_row['target_num_min'] = parameter_text_json.get('TARGET_NUM').get('min')
+            new_row['target_num_max'] = parameter_text_json.get('TARGET_NUM').get('max')
+        else:
+            new_row['target_num_min'] = parameter_text_json.get('TARGET_NUM')
+            new_row['target_num_max'] = parameter_text_json.get('TARGET_NUM')
+
+        new_row['attack_magnification'] = parameter_text_json.get('ATTACK_MAGNIFICATION')
+        new_row['recovery_magnification'] = parameter_text_json.get('RECOVERY_MAGNIFICATION')
+        new_row['buffer_magical_attack_magnification'] = parameter_text_json.get('BUFFER_MAGICAL_ATTACK_MAGNIFICATION')
+        new_row['buffer_magical_defense_magnification'] = parameter_text_json.get('BUFFER_MAGICAL_DEFENSE_MAGNIFICATION')
+        new_row['buffer_physical_attack_magnification'] = parameter_text_json.get('BUFFER_PHYSICAL_ATTACK_MAGNIFICATION')
+        new_row['buffer_physical_defense_magnification'] = parameter_text_json.get('BUFFER_PHYSICAL_DEFENSE_MAGNIFICATION')
+        new_row['debuffer_magical_attack_magnification'] = parameter_text_json.get('DEBUFFER_MAGICAL_ATTACK_MAGNIFICATION')
+        new_row['debuffer_magical_defense_magnification'] = parameter_text_json.get('DEBUFFER_MAGICAL_DEFENSE_MAGNIFICATION')
+        new_row['debuffer_physical_attack_magnification'] = parameter_text_json.get('DEBUFFER_PHYSICAL_ATTACK_MAGNIFICATION')
+        new_row['debuffer_physical_defense_magnification'] = parameter_text_json.get('DEBUFFER_PHYSICAL_DEFENSE_MAGNIFICATION')
+
+        # For support skills, check if there are ATTACK, RECOVERY or BUFFER keys in the dict
+        action_list = ['ATTACK', 'BUFFER', 'RECOVERY']
+        parameter_text_keys = parameter_text_json.keys()
+        # Initialise to all key-values to None first
+        init_parameter_keys(new_row)
+        for action in action_list:
+            if action in parameter_text_keys:
+                # NOTE: There is a possibility of overwriting previously set values if more than one action appears in the keys
+                # NOTE: There is also a possibility of overwriting if same key appears in both the skill dict AND the parameter_text_json dict
+                get_parameter_text_key_values(new_row, parameter_text_json, action)
+
         parsed_skill_list.append(new_row)
 
     return parsed_skill_list
+
+def init_parameter_keys(new_row):
+    # These are guaranteed to be support skill effects
+    possible_param_keys = [
+        'attack_up_magnification',
+        'buffer_up_magnification',
+        'recovery_up_magnification',
+        'use_sp_reduce_magnification',
+        # These can be main skill OR support skill effects
+        'buffer_magical_attack_magnification',
+        'buffer_magical_defense_magnification',
+        'buffer_physical_attack_magnification',
+        'buffer_physical_defense_magnification',
+        'debuffer_magical_attack_magnification',
+        'debuffer_magical_defense_magnification',
+        'debuffer_physical_attack_magnification',
+        'debuffer_physical_defense_magnification'
+    ]
+    for key in possible_param_keys:
+        if key not in new_row:
+            new_row[key] = None
+    return
+
+
+def get_parameter_text_key_values(new_row, parameter_text_json, key):
+    # These are guaranteed to be support skill effects
+    new_row['attack_up_magnification'] = parameter_text_json.get(key).get('ATTACK_UP_MAGNIFICATION')
+    new_row['buffer_up_magnification'] = parameter_text_json.get(key).get('BUFFER_UP_MAGNIFICATION')
+    new_row['recovery_up_magnification'] = parameter_text_json.get(key).get('RECOVERY_UP_MAGNIFICATION')
+    new_row['use_sp_reduce_magnification'] = parameter_text_json.get(key).get('USE_SP_REDUCE_MAGNIFICATION')
+    # These can be main skill OR support skill effects
+    new_row['buffer_magical_attack_magnification'] = parameter_text_json.get(key).get('BUFFER_MAGICAL_ATTACK_MAGNIFICATION')
+    new_row['buffer_magical_defense_magnification'] = parameter_text_json.get(key).get('BUFFER_MAGICAL_DEFENSE_MAGNIFICATION')
+    new_row['buffer_physical_attack_magnification'] = parameter_text_json.get(key).get('BUFFER_PHYSICAL_ATTACK_MAGNIFICATION')
+    new_row['buffer_physical_defense_magnification'] = parameter_text_json.get(key).get('BUFFER_PHYSICAL_DEFENSE_MAGNIFICATION')
+    new_row['debuffer_magical_attack_magnification'] = parameter_text_json.get(key).get('DEBUFFER_MAGICAL_ATTACK_MAGNIFICATION')
+    new_row['debuffer_magical_defense_magnification'] = parameter_text_json.get(key).get('DEBUFFER_MAGICAL_DEFENSE_MAGNIFICATION')
+    new_row['debuffer_physical_attack_magnification'] = parameter_text_json.get(key).get('DEBUFFER_PHYSICAL_ATTACK_MAGNIFICATION')
+    new_row['debuffer_physical_defense_magnification'] = parameter_text_json.get(key).get('DEBUFFER_PHYSICAL_DEFENSE_MAGNIFICATION')
+    return
+
 
 def generate_unique_cards(parsed_card_mst_list, dict_of_dicts):
     seen_list = []
@@ -144,6 +222,14 @@ def generate_unique_cards(parsed_card_mst_list, dict_of_dicts):
         unique_card_list.append(new_unique_card)
 
     return unique_card_list
+
+def get_keys(dl, keys=[]):
+    if isinstance(dl, dict):
+        keys += dl.keys()
+        _ = [get_keys(x, keys) for x in dl.values()]
+    elif isinstance(dl, list):
+        _ = [get_keys(x, keys) for x in dl]
+    return list(set(keys))
 
 # Get the folder where the translation CSVs are
 translation_dir = get_directory('Select the TWLangR folder')
