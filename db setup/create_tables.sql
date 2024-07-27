@@ -32,6 +32,17 @@ CREATE TABLE memoria
     max_mag_def INT,
     deck_cost SMALLINT,
     is_emoria BOOLEAN,
+    awakened_card_type INT,
+    awaken_add_phys_atk INT,
+    awaken_add_mag_atk INT,
+    awaken_add_phys_def INT,
+    awaken_add_mag_def INT,
+    awaken_quest_skill_mst_id INT,
+    awaken_gvg_skill_mst_id INT,
+    awaken_gvg_auto_skill_mst_id INT,
+    new_awaken_quest_skill_mst_id INT,
+    new_awaken_gvg_skill_mst_id INT,
+    new_awaken_gvg_auto_skill_mst_id INT,
     PRIMARY KEY (card_mst_id)
 );
 
@@ -76,6 +87,27 @@ CREATE TABLE skills
     USE_SP_REDUCE_MAGNIFICATION REAL,
     PRIMARY KEY (skill_mst_id)
 );
+
+DROP TABLE IF EXISTS super_awakened_memoria;
+CREATE TABLE super_awakened_memoria
+(
+    card_mst_id INT,
+    card_type SMALLINT,
+    quest_skill_mst_id INT,
+    gvg_skill_mst_id INT,
+    gvg_auto_skill_mst_id INT,
+    limit_break_bonus_mst_id INT,
+    base_phys_atk INT,
+    base_phys_def INT,
+    base_mag_atk INT,
+    base_mag_def INT,
+    max_phys_atk INT,
+    max_phys_def INT,
+    max_mag_atk INT,
+    max_mag_def INT,  
+    PRIMARY KEY (card_mst_id, card_type)
+);
+
 
 DROP TABLE IF EXISTS skill_types;
 CREATE TABLE skill_types
