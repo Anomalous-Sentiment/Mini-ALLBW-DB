@@ -52,6 +52,7 @@ def parse_card_mst_list(target_dir, filename):
     # iterate through and convert to format suitable for inserting in DB
     for card in card_list:
         new_row = {}
+        new_row['name'] = card['name']
         new_row['card_mst_id'] = card['cardMstId']
         new_row['unique_id'] = card['uniqueId']
         new_row['card_type'] = card['cardType']
@@ -72,7 +73,25 @@ def parse_card_mst_list(target_dir, filename):
         new_row['deck_cost'] = card['deckCost']
         new_row['is_emoria'] = card['isEmoria']
 
-        new_row['name'] = card['name']
+        # New awakened type
+        new_row['awakened_card_type'] = card['awakenedAddCardType']
+
+        # Awakening stats
+        new_row['awaken_add_phys_atk'] = card['awakenedAddPhysicalAttack']
+        new_row['awaken_add_mag_atk'] = card['awakenedAddMagicalAttack']
+        new_row['awaken_add_phys_def'] = card['awakenedAddPhysicalDefense']
+        new_row['awaken_add_mag_def'] = card['awakenedAddMagicalDefense']
+
+        # Enhanced base skill from awakening
+        new_row['awaken_quest_skill_mst_id'] = card['awakenedQuestSkillMstId']
+        new_row['awaken_gvg_skill_mst_id'] = card['awakenedGvgSkillMstId']
+        new_row['awaken_gvg_auto_skill_mst_id'] = card['awakenedGvgAutoSkillMstId']
+
+        # Newly added skill from awakening
+        new_row['new_awaken_quest_skill_mst_id'] = card['awakenedAddQuestSkillMstId']
+        new_row['new_awaken_gvg_skill_mst_id'] = card['awakenedAddGvgSkillMstId']
+        new_row['new_awaken_gvg_auto_skill_mst_id'] = card['awakenedAddGvgAutoSkillMstId']
+
 
         parsed_card_list.append(new_row)
 
@@ -82,20 +101,26 @@ def parse_skill_mst_list(target_dir):
     parsed_skill_list = []
     return parsed_skill_list
 
+def batch(iterable, n=1):
+    l = len(iterable)
+    for ndx in range(0, l, n):
+        yield iterable[ndx:min(ndx + n, l)]
+
 def upsert_into_table(table_name, rows):
-    response = (
-        supabase.table(table_name)
-        .upsert(rows)
-        .execute()
-    )
+    response = None
+    for x in batch(rows, 4000):
+        response = (
+            supabase.table(table_name)
+            .upsert(x)
+            .execute()
+        )
     return response
 
 def parse_skill_mst_list(target_dir, filename, dict_of_dicts):
     parsed_skill_list = []
     # Get the card mst list
     skill_list = read_json(target_dir, filename)
-    longest_name = ''
-    longest_desc = ''
+
     # keys = []
     for skill in skill_list:
         # convert parameterText string to json and get all keys
@@ -156,6 +181,30 @@ def parse_skill_mst_list(target_dir, filename, dict_of_dicts):
         parsed_skill_list.append(new_row)
 
     return parsed_skill_list
+
+def parse_super_awakened_mst_list(target_dir, filename):
+    parsed_awakened_list = []
+    # Get the super awakened card mst list
+    awakened_list = read_json(target_dir, filename)
+
+    for card in awakened_list:
+        new_row = {}
+        new_row['card_mst_id'] = card['cardMstId']
+        new_row['card_type'] = card['cardType']
+        new_row['quest_skill_mst_id'] = card['questSkillMstId']
+        new_row['gvg_skill_mst_id'] = card['gvgSkillMstId']
+        new_row['gvg_auto_skill_mst_id'] = card['gvgAutoSkillMstId']
+        new_row['limit_break_bonus_mst_id'] = card['limitBreakBonusMstId']
+        new_row['base_phys_atk'] = card['basePhysicalAttack']
+        new_row['base_phys_def'] = card['basePhysicalDefense']
+        new_row['base_mag_atk'] = card['baseMagicalAttack']
+        new_row['base_mag_def'] = card['baseMagicalDefense']
+        new_row['max_phys_atk'] = card['maxPhysicalAttack']
+        new_row['max_phys_def'] = card['maxPhysicalDefense']
+        new_row['max_mag_atk'] = card['maxMagicalAttack']
+        new_row['max_mag_def'] = card['maxMagicalDefense']
+        parsed_awakened_list.append(new_row)
+    return parsed_awakened_list
 
 def init_parameter_keys(new_row):
     # These are guaranteed to be support skill effects
@@ -231,37 +280,45 @@ def get_keys(dl, keys=[]):
         _ = [get_keys(x, keys) for x in dl]
     return list(set(keys))
 
-# Get the folder where the translation CSVs are
-translation_dir = get_directory('Select the TWLangR folder')
 
-# Get the folder where the card mst list is
-mst_dir = get_directory('Select the folder containing the mst lists')
+def main(supabase):
+    # Get the folder where the translation CSVs are
+    translation_dir = get_directory('Select the TWLangR folder')
 
-# Get and parse the card mst list
-parsed_card_list = parse_card_mst_list(mst_dir, 'getCardMstList.json')
+    # Get the folder where the card mst list is
+    mst_dir = get_directory('Select the folder containing the mst lists')
 
-# Get all translation dicts
-en_dict = get_translation_dict(translation_dir, 'EN')
-cn_dict = get_translation_dict(translation_dir, 'CN')
-kr_dict = get_translation_dict(translation_dir, 'KR')
-tw_dict = get_translation_dict(translation_dir, 'TW')
+    # Get and parse the card mst list
+    parsed_card_list = parse_card_mst_list(mst_dir, 'getCardMstList.json')
 
-dict_of_dicts = {}
-dict_of_dicts['EN'] = en_dict
-dict_of_dicts['CN'] = cn_dict
-dict_of_dicts['KR'] = kr_dict
-dict_of_dicts['TW'] = tw_dict
+    # Get all translation dicts
+    en_dict = get_translation_dict(translation_dir, 'EN')
+    cn_dict = get_translation_dict(translation_dir, 'CN')
+    kr_dict = get_translation_dict(translation_dir, 'KR')
+    tw_dict = get_translation_dict(translation_dir, 'TW')
 
-# Generate unique card list
-unique_card_list = generate_unique_cards(parsed_card_list, dict_of_dicts)
+    dict_of_dicts = {}
+    dict_of_dicts['EN'] = en_dict
+    dict_of_dicts['CN'] = cn_dict
+    dict_of_dicts['KR'] = kr_dict
+    dict_of_dicts['TW'] = tw_dict
 
-# Get parsed mst skill list
-parsed_skill_list = parse_skill_mst_list(mst_dir, 'getSkillMstList.json', dict_of_dicts)
+    # Generate unique card list
+    unique_card_list = generate_unique_cards(parsed_card_list, dict_of_dicts)
 
-# remove the name key form dicts in the parsed card list
-parsed_card_list = [{k: v for k, v in d.items() if k != 'name'} for d in parsed_card_list]
+    # Get parsed mst skill list
+    parsed_skill_list = parse_skill_mst_list(mst_dir, 'getSkillMstList.json', dict_of_dicts)
 
-# Insert into database
-response = upsert_into_table('unique_memoria', unique_card_list)
-response = upsert_into_table('skills', parsed_skill_list)
-response = upsert_into_table('memoria', parsed_card_list)
+    # remove the name key from dicts in the parsed card list
+    parsed_card_list = [{k: v for k, v in d.items() if k != 'name'} for d in parsed_card_list]
+
+    # Get the super wakened card data
+    parsed_super_awakening_list = parse_super_awakened_mst_list(mst_dir, 'getCardSuperAwakeningCardTypeMstList.json')
+
+    # Insert into database
+    # response = upsert_into_table('unique_memoria', unique_card_list)
+    # response = upsert_into_table('skills', parsed_skill_list)
+    # response = upsert_into_table('memoria', parsed_card_list)
+    response = upsert_into_table('super_awakened_memoria', parsed_super_awakening_list)
+
+main(supabase)
