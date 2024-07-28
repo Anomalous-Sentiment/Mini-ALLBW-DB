@@ -1,4 +1,4 @@
-DROP VIEW IF EXISTS memoria_list;
+DROP VIEW IF EXISTS memoria_list CASCADE;
 CREATE OR REPLACE VIEW memoria_list AS
     SELECT 
         u_mem.unique_id, 
@@ -23,7 +23,7 @@ CREATE OR REPLACE VIEW memoria_list AS
     INNER JOIN skills auto_sk ON auto_sk.skill_mst_id = mem.gvg_auto_skill_mst_id;
 
 -- Gets only the evolved form of memoria
-DROP VIEW IF EXISTS evolved_memoria_list;
+DROP VIEW IF EXISTS evolved_memoria_list CASCADE;
 CREATE OR REPLACE VIEW evolved_memoria_list AS
     SELECT 
         DISTINCT ON (u_mem.unique_id)
@@ -49,7 +49,7 @@ CREATE OR REPLACE VIEW evolved_memoria_list AS
 
 -- View to get all normal evolved awakened memoria
 -- TODO: UNION with the list of awakened default skill of memoria
-DROP VIEW IF EXISTS awakened_memoria_list;
+DROP VIEW IF EXISTS awakened_memoria_list CASCADE;
 CREATE OR REPLACE VIEW awakened_memoria_list AS
     SELECT 
         DISTINCT ON (u_mem.unique_id) u_mem.unique_id,
@@ -72,7 +72,7 @@ CREATE OR REPLACE VIEW awakened_memoria_list AS
     ORDER BY u_mem.unique_id, mem.rarity DESC, mem.card_mst_id;
 
 -- View to get all evolved super awakened memoria
-DROP VIEW IF EXISTS super_awakened_memoria_list;
+DROP VIEW IF EXISTS super_awakened_memoria_list CASCADE;
 CREATE OR REPLACE VIEW super_awakened_memoria_list AS
     SELECT 
         u_mem.unique_id,
@@ -94,40 +94,41 @@ CREATE OR REPLACE VIEW super_awakened_memoria_list AS
     INNER JOIN super_awakened_memoria awk_mem ON awk_mem.card_mst_id = mem.card_mst_id;
 
 -- Union of all evolved, awakened/super awakened memoria with translations
-DROP VIEW IF EXISTS combined_memoria_list;
+DROP VIEW IF EXISTS combined_memoria_list CASCADE;
 CREATE OR REPLACE VIEW combined_memoria_list AS
     SELECT
+        ROW_NUMBER() OVER () AS "row",
         merged.*,
-        quest_sk.en_name,
-        quest_sk.en_description,
-        gvg_sk.en_name,
-        gvg_sk.en_description,
-        auto_sk.en_name,
-        auto_sk.en_description,
-        quest_sk.jp_name,
-        quest_sk.jp_description,
-        gvg_sk.jp_name,
-        gvg_sk.jp_description,
-        auto_sk.jp_name,
-        auto_sk.jp_description,
-        quest_sk.cn_name,
-        quest_sk.cn_description,
-        gvg_sk.cn_name,
-        gvg_sk.cn_description,
-        auto_sk.cn_name,
-        auto_sk.cn_description,
-        quest_sk.kr_name,
-        quest_sk.kr_description,
-        gvg_sk.kr_name,
-        gvg_sk.kr_description,
-        auto_sk.kr_name,
-        auto_sk.kr_description,
-        quest_sk.tw_name,
-        quest_sk.tw_description,
-        gvg_sk.tw_name,
-        gvg_sk.tw_description,
-        auto_sk.tw_name,
-        auto_sk.tw_description
+        quest_sk.en_name AS "quest_en_name",
+        quest_sk.en_description AS "quest_en_desc",
+        gvg_sk.en_name AS "gvg_en_name",
+        gvg_sk.en_description AS "gvg_en_desc",
+        auto_sk.en_name AS "auto_en_name",
+        auto_sk.en_description AS "auto_en_desc",
+        quest_sk.jp_name AS "quest_jp_name",
+        quest_sk.jp_description AS "quest_jp_desc",
+        gvg_sk.jp_name AS "gvg_jp_name",
+        gvg_sk.jp_description AS "gvg_jp_desc",
+        auto_sk.jp_name AS "auto_jp_name",
+        auto_sk.jp_description AS "auto_jp_desc",
+        quest_sk.cn_name AS "quest_cn_name",
+        quest_sk.cn_description AS "quest_cn_desc",
+        gvg_sk.cn_name AS "gvg_cn_name",
+        gvg_sk.cn_description AS "gvg_cn_desc",
+        auto_sk.cn_name AS "auto_cn_name",
+        auto_sk.cn_description AS "auto_cn_desc",
+        quest_sk.kr_name AS "quest_kr_name",
+        quest_sk.kr_description AS "quest_kr_desc",
+        gvg_sk.kr_name AS "gvg_kr_name",
+        gvg_sk.kr_description AS "gvg_kr_desc",
+        auto_sk.kr_name AS "auto_kr_name",
+        auto_sk.kr_description AS "auto_kr_desc",
+        quest_sk.tw_name AS "quest_tw_name",
+        quest_sk.tw_description AS "quest_tw_desc",
+        gvg_sk.tw_name AS "gvg_tw_name",
+        gvg_sk.tw_description AS "gvg_tw_desc",
+        auto_sk.tw_name AS "auto_tw_name",
+        auto_sk.tw_description AS "auto_tw_desc"
     FROM
     (
         SELECT 
