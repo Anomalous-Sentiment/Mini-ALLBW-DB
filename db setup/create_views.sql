@@ -51,6 +51,7 @@ CREATE OR REPLACE VIEW evolved_memoria_list AS
 -- TODO: UNION with the list of awakened default skill of memoria
 DROP VIEW IF EXISTS awakened_memoria_list CASCADE;
 CREATE OR REPLACE VIEW awakened_memoria_list AS
+(
     SELECT 
         DISTINCT ON (u_mem.unique_id) u_mem.unique_id,
         mem.card_mst_id, 
@@ -69,7 +70,31 @@ CREATE OR REPLACE VIEW awakened_memoria_list AS
     FROM memoria mem 
     INNER JOIN unique_memoria u_mem ON mem.unique_id = u_mem.unique_id
     WHERE mem.awakened_card_type != 0
-    ORDER BY u_mem.unique_id, mem.rarity DESC, mem.card_mst_id;
+    ORDER BY u_mem.unique_id, mem.rarity DESC, mem.card_mst_id
+)
+UNION
+(
+        SELECT 
+        DISTINCT ON (u_mem.unique_id) u_mem.unique_id,
+        mem.card_mst_id, 
+        mem.rarity, 
+        mem.awakened_card_type AS "card_type", 
+        mem.attribute, 
+        mem.new_awaken_quest_skill_mst_id, 
+        mem.new_awaken_gvg_skill_mst_id, 
+        mem.new_awaken_gvg_auto_skill_mst_id, 
+        mem.max_phys_atk + mem.awaken_add_phys_atk AS "max_phys_atk", 
+        mem.max_phys_def + mem.awaken_add_phys_def AS "max_phys_def", 
+        mem.max_mag_atk + mem.awaken_add_mag_atk AS "max_mag_atk", 
+        mem.max_mag_def + mem.awaken_add_mag_def  AS "max_mag_def",
+        TRUE AS "awakened",
+        FALSE AS "super_awakened"
+    FROM memoria mem 
+    INNER JOIN unique_memoria u_mem ON mem.unique_id = u_mem.unique_id
+    WHERE mem.awakened_card_type != 0
+    ORDER BY u_mem.unique_id, mem.rarity DESC, mem.card_mst_id
+);
+
 
 -- View to get all evolved super awakened memoria
 DROP VIEW IF EXISTS super_awakened_memoria_list CASCADE;
@@ -80,13 +105,13 @@ CREATE OR REPLACE VIEW super_awakened_memoria_list AS
         mem.rarity, 
         mem.awakened_card_type AS "card_type", 
         mem.attribute, 
-        mem.quest_skill_mst_id, 
-        mem.gvg_skill_mst_id, 
-        mem.gvg_auto_skill_mst_id, 
-        mem.max_phys_atk + mem.awaken_add_phys_atk AS "max_phys_atk", 
-        mem.max_phys_def + mem.awaken_add_phys_def AS "max_phys_def", 
-        mem.max_mag_atk + mem.awaken_add_mag_atk AS "max_mag_atk", 
-        mem.max_mag_def + mem.awaken_add_mag_def  AS "max_mag_def",
+        awk_mem.quest_skill_mst_id, 
+        awk_mem.gvg_skill_mst_id, 
+        awk_mem.gvg_auto_skill_mst_id, 
+        mem.max_phys_atk + awk_mem.max_phys_atk AS "max_phys_atk", 
+        mem.max_phys_def + awk_mem.max_phys_def AS "max_phys_def", 
+        mem.max_mag_atk + awk_mem.max_mag_atk AS "max_mag_atk", 
+        mem.max_mag_def + awk_mem.max_mag_def  AS "max_mag_def",
         TRUE AS "awakened",
         TRUE AS "super_awakened"
     FROM memoria mem 
@@ -98,6 +123,11 @@ DROP VIEW IF EXISTS combined_memoria_list CASCADE;
 CREATE OR REPLACE VIEW combined_memoria_list AS
     SELECT
         ROW_NUMBER() OVER () AS "row",
+        u_mem.en_name,
+        u_mem.jp_name,
+        u_mem.kr_name,
+        u_mem.cn_name,
+        u_mem.tw_name,
         merged.*,
         quest_sk.en_name AS "quest_en_name",
         quest_sk.en_description AS "quest_en_desc",
@@ -143,9 +173,10 @@ CREATE OR REPLACE VIEW combined_memoria_list AS
             super_mem.*
         FROM super_awakened_memoria_list super_mem
     ) merged
-    INNER JOIN skills quest_sk ON  quest_sk.skill_mst_id = merged.quest_skill_mst_id
-    INNER JOIN skills gvg_sk ON  gvg_sk.skill_mst_id = merged.gvg_skill_mst_id
-    INNER JOIN skills auto_sk ON  auto_sk.skill_mst_id = merged.gvg_auto_skill_mst_id;
+    INNER JOIN skills quest_sk ON quest_sk.skill_mst_id = merged.quest_skill_mst_id
+    INNER JOIN skills gvg_sk ON gvg_sk.skill_mst_id = merged.gvg_skill_mst_id
+    INNER JOIN skills auto_sk ON auto_sk.skill_mst_id = merged.gvg_auto_skill_mst_id
+    INNER JOIN unique_memoria u_mem ON u_mem.unique_id = merged.unique_id;
     
 
 DROP VIEW IF EXISTS gvg_support_magnification;
@@ -180,7 +211,9 @@ CREATE OR REPLACE VIEW gvg_magnification AS
         gvg_sk.DEBUFFER_MAGICAL_DEFENSE_MAGNIFICATION,
         gvg_sk.DEBUFFER_PHYSICAL_ATTACK_MAGNIFICATION,
         gvg_sk.DEBUFFER_PHYSICAL_DEFENSE_MAGNIFICATION,
-        gvg_sk.RECOVERY_MAGNIFICATION
+        gvg_sk.RECOVERY_MAGNIFICATION,
+        gvg_sk.BUFFER_UP_MAGNIFICATION,
+        gvg_sk.USE_SP_REDUCE_MAGNIFICATION
     FROM skills gvg_sk
     INNER JOIN memoria mem ON mem.gvg_skill_mst_id = gvg_sk.skill_mst_id
     INNER JOIN unique_memoria u_mem ON u_mem.unique_id = mem.unique_id;
