@@ -48,7 +48,7 @@ CREATE OR REPLACE VIEW evolved_memoria_list AS
 -- TODO: Create a new view to get all awakened memoria (awakened and super awakened) to union with evolved memo list
 
 -- View to get all normal evolved awakened memoria
--- TODO: UNION with the list of awakened default skill of memoria
+-- First get default awakened skill, then union with new awakened skill
 DROP VIEW IF EXISTS awakened_memoria_list CASCADE;
 CREATE OR REPLACE VIEW awakened_memoria_list AS
 (
@@ -56,11 +56,11 @@ CREATE OR REPLACE VIEW awakened_memoria_list AS
         DISTINCT ON (u_mem.unique_id) u_mem.unique_id,
         mem.card_mst_id, 
         mem.rarity, 
-        mem.awakened_card_type AS "card_type", 
+        mem.card_type AS "card_type", 
         mem.attribute, 
-        mem.quest_skill_mst_id, 
-        mem.gvg_skill_mst_id, 
-        mem.gvg_auto_skill_mst_id, 
+        mem.awaken_quest_skill_mst_id AS "quest_skill_mst_id", 
+        mem.awaken_gvg_skill_mst_id AS "gvg_skill_mst_id", 
+        mem.awaken_gvg_auto_skill_mst_id AS "gvg_auto_skill_mst_id", 
         mem.max_phys_atk + mem.awaken_add_phys_atk AS "max_phys_atk", 
         mem.max_phys_def + mem.awaken_add_phys_def AS "max_phys_def", 
         mem.max_mag_atk + mem.awaken_add_mag_atk AS "max_mag_atk", 
@@ -72,7 +72,7 @@ CREATE OR REPLACE VIEW awakened_memoria_list AS
     WHERE mem.awakened_card_type != 0
     ORDER BY u_mem.unique_id, mem.rarity DESC, mem.card_mst_id
 )
-UNION
+UNION ALL
 (
         SELECT 
         DISTINCT ON (u_mem.unique_id) u_mem.unique_id,
@@ -80,9 +80,9 @@ UNION
         mem.rarity, 
         mem.awakened_card_type AS "card_type", 
         mem.attribute, 
-        mem.new_awaken_quest_skill_mst_id, 
-        mem.new_awaken_gvg_skill_mst_id, 
-        mem.new_awaken_gvg_auto_skill_mst_id, 
+        mem.new_awaken_quest_skill_mst_id AS "quest_skill_mst_id", 
+        mem.new_awaken_gvg_skill_mst_id AS "gvg_skill_mst_id", 
+        mem.new_awaken_gvg_auto_skill_mst_id AS "gvg_auto_skill_mst_id", 
         mem.max_phys_atk + mem.awaken_add_phys_atk AS "max_phys_atk", 
         mem.max_phys_def + mem.awaken_add_phys_def AS "max_phys_def", 
         mem.max_mag_atk + mem.awaken_add_mag_atk AS "max_mag_atk", 
@@ -158,17 +158,62 @@ CREATE OR REPLACE VIEW combined_memoria_list AS
         gvg_sk.tw_name AS "gvg_tw_name",
         gvg_sk.tw_description AS "gvg_tw_desc",
         auto_sk.tw_name AS "auto_tw_name",
-        auto_sk.tw_description AS "auto_tw_desc"
+        auto_sk.tw_description AS "auto_tw_desc",
+
+        quest_sk.ATTACK_MAGNIFICATION AS "quest_attack_magnification",
+        quest_sk.RECOVERY_MAGNIFICATION AS "quest_recovery_magnification",
+        quest_sk.BUFFER_MAGICAL_ATTACK_MAGNIFICATION AS "quest_buffer_magical_attack_magnification",
+        quest_sk.BUFFER_MAGICAL_DEFENSE_MAGNIFICATION AS "quest_buffer_magical_defense_magnification",
+        quest_sk.BUFFER_PHYSICAL_ATTACK_MAGNIFICATION AS "quest_buffer_physical_attack_magnification",
+        quest_sk.BUFFER_PHYSICAL_DEFENSE_MAGNIFICATION AS "quest_buffer_physical_defense_magnification",
+        quest_sk.DEBUFFER_MAGICAL_ATTACK_MAGNIFICATION AS "quest_debuffer_magical_attack_magnification",
+        quest_sk.DEBUFFER_MAGICAL_DEFENSE_MAGNIFICATION AS "quest_debuffer_magical_defense_magnification",
+        quest_sk.DEBUFFER_PHYSICAL_ATTACK_MAGNIFICATION AS "quest_debuffer_physical_attack_magnification",
+        quest_sk.DEBUFFER_PHYSICAL_DEFENSE_MAGNIFICATION AS "quest_debuffer_physical_defense_magnification",
+        quest_sk.ATTACK_UP_MAGNIFICATION AS "quest_attack_up_magnification",
+        quest_sk.RECOVERY_UP_MAGNIFICATION AS "quest_recovery_up_magnification",
+        quest_sk.BUFFER_UP_MAGNIFICATION AS "quest_buffer_up_magnification",
+        quest_sk.USE_SP_REDUCE_MAGNIFICATION AS "quest_use_sp_reduce_magnification",
+        
+        gvg_sk.ATTACK_MAGNIFICATION AS "gvg_attack_magnification",
+        gvg_sk.RECOVERY_MAGNIFICATION AS "gvg_recovery_magnification",
+        gvg_sk.BUFFER_MAGICAL_ATTACK_MAGNIFICATION AS "gvg_buffer_magical_attack_magnification",
+        gvg_sk.BUFFER_MAGICAL_DEFENSE_MAGNIFICATION AS "gvg_buffer_magical_defense_magnification",
+        gvg_sk.BUFFER_PHYSICAL_ATTACK_MAGNIFICATION AS "gvg_buffer_physical_attack_magnification",
+        gvg_sk.BUFFER_PHYSICAL_DEFENSE_MAGNIFICATION AS "gvg_buffer_physical_defense_magnification",
+        gvg_sk.DEBUFFER_MAGICAL_ATTACK_MAGNIFICATION AS "gvg_debuffer_magical_attack_magnification",
+        gvg_sk.DEBUFFER_MAGICAL_DEFENSE_MAGNIFICATION AS "gvg_debuffer_magical_defense_magnification",
+        gvg_sk.DEBUFFER_PHYSICAL_ATTACK_MAGNIFICATION AS "gvg_debuffer_physical_attack_magnification",
+        gvg_sk.DEBUFFER_PHYSICAL_DEFENSE_MAGNIFICATION AS "gvg_debuffer_physical_defense_magnification",
+        gvg_sk.ATTACK_UP_MAGNIFICATION AS "gvg_attack_up_magnification",
+        gvg_sk.RECOVERY_UP_MAGNIFICATION AS "gvg_recovery_up_magnification",
+        gvg_sk.BUFFER_UP_MAGNIFICATION AS "gvg_buffer_up_magnification",
+        gvg_sk.USE_SP_REDUCE_MAGNIFICATION AS "gvg_use_sp_reduce_magnification",
+
+        auto_sk.ATTACK_MAGNIFICATION AS "auto_attack_magnification",
+        auto_sk.RECOVERY_MAGNIFICATION AS "auto_recovery_magnification",
+        auto_sk.BUFFER_MAGICAL_ATTACK_MAGNIFICATION AS "auto_buffer_magical_attack_magnification",
+        auto_sk.BUFFER_MAGICAL_DEFENSE_MAGNIFICATION AS "auto_buffer_magical_defense_magnification",
+        auto_sk.BUFFER_PHYSICAL_ATTACK_MAGNIFICATION AS "auto_buffer_physical_attack_magnification",
+        auto_sk.BUFFER_PHYSICAL_DEFENSE_MAGNIFICATION AS "auto_buffer_physical_defense_magnification",
+        auto_sk.DEBUFFER_MAGICAL_ATTACK_MAGNIFICATION AS "auto_debuffer_magical_attack_magnification",
+        auto_sk.DEBUFFER_MAGICAL_DEFENSE_MAGNIFICATION AS "auto_debuffer_magical_defense_magnification",
+        auto_sk.DEBUFFER_PHYSICAL_ATTACK_MAGNIFICATION AS "auto_debuffer_physical_attack_magnification",
+        auto_sk.DEBUFFER_PHYSICAL_DEFENSE_MAGNIFICATION AS "auto_debuffer_physical_defense_magnification",
+        auto_sk.ATTACK_UP_MAGNIFICATION AS "auto_attack_up_magnification",
+        auto_sk.RECOVERY_UP_MAGNIFICATION AS "auto_recovery_up_magnification",
+        auto_sk.BUFFER_UP_MAGNIFICATION AS "auto_buffer_up_magnification",
+        auto_sk.USE_SP_REDUCE_MAGNIFICATION AS "auto_use_sp_reduce_magnification"
     FROM
     (
         SELECT 
             evo_mem.*
         FROM evolved_memoria_list evo_mem
-    UNION
+    UNION ALL
         SELECT 
             awk_mem.*
         FROM awakened_memoria_list awk_mem
-    UNION
+    UNION ALL
         SELECT 
             super_mem.*
         FROM super_awakened_memoria_list super_mem
