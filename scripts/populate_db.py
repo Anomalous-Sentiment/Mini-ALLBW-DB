@@ -108,7 +108,7 @@ def batch(iterable, n=1):
 
 def upsert_into_table(table_name, rows):
     response = None
-    for x in batch(rows, 4000):
+    for x in batch(rows, 3000):
         response = (
             supabase.table(table_name)
             .upsert(x)
@@ -168,7 +168,7 @@ def parse_skill_mst_list(target_dir, filename, dict_of_dicts):
         new_row['debuffer_physical_defense_magnification'] = parameter_text_json.get('DEBUFFER_PHYSICAL_DEFENSE_MAGNIFICATION')
 
         # For support skills, check if there are ATTACK, RECOVERY or BUFFER keys in the dict
-        action_list = ['ATTACK', 'BUFFER', 'RECOVERY']
+        action_list = ['ATTACK', 'BUFFER', 'RECOVERY', 'COMMAND']
         parameter_text_keys = parameter_text_json.keys()
         # Initialise to all key-values to None first
         init_parameter_keys(new_row)
@@ -317,8 +317,8 @@ def main(supabase):
 
     # Insert into database
     # response = upsert_into_table('unique_memoria', unique_card_list)
-    # response = upsert_into_table('skills', parsed_skill_list)
+    response = upsert_into_table('skills', parsed_skill_list)
     # response = upsert_into_table('memoria', parsed_card_list)
-    response = upsert_into_table('super_awakened_memoria', parsed_super_awakening_list)
+    # response = upsert_into_table('super_awakened_memoria', parsed_super_awakening_list)
 
 main(supabase)
