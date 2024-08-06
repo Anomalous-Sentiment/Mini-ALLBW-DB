@@ -112,7 +112,7 @@ CREATE OR REPLACE VIEW super_awakened_memoria_list AS
         mem.max_phys_def + awk_mem.max_phys_def AS "max_phys_def", 
         mem.max_mag_atk + awk_mem.max_mag_atk AS "max_mag_atk", 
         mem.max_mag_def + awk_mem.max_mag_def  AS "max_mag_def",
-        TRUE AS "awakened",
+        FALSE AS "awakened",
         TRUE AS "super_awakened"
     FROM memoria mem 
     INNER JOIN unique_memoria u_mem ON mem.unique_id = u_mem.unique_id

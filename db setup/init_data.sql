@@ -26,9 +26,9 @@ VALUES
     (2, 'Regular Ranged Attack'),
     (3, 'Special Unit Attack'),
     (4, 'Special Ranged Attack'),
-    (5, 'Healing'),
+    (7, 'Healing'),
     (6, 'Obstruction'),
-    (7, 'Assistance')
+    (5, 'Assistance')
 ON CONFLICT (card_type) DO 
     UPDATE SET 
         card_type_name = EXCLUDED.card_type;
