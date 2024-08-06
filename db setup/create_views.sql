@@ -100,7 +100,7 @@ UNION ALL
 DROP VIEW IF EXISTS super_awakened_memoria_list CASCADE;
 CREATE OR REPLACE VIEW super_awakened_memoria_list AS
     SELECT 
-        u_mem.unique_id,
+        DISTINCT ON (u_mem.unique_id, awk_mem.card_type) u_mem.unique_id,
         mem.card_mst_id, 
         mem.rarity, 
         awk_mem.card_type AS "card_type", 
@@ -116,7 +116,8 @@ CREATE OR REPLACE VIEW super_awakened_memoria_list AS
         TRUE AS "super_awakened"
     FROM memoria mem 
     INNER JOIN unique_memoria u_mem ON mem.unique_id = u_mem.unique_id
-    INNER JOIN super_awakened_memoria awk_mem ON awk_mem.card_mst_id = mem.card_mst_id;
+    INNER JOIN super_awakened_memoria awk_mem ON awk_mem.card_mst_id = mem.card_mst_id
+    ORDER BY u_mem.unique_id, awk_mem.card_type, mem.rarity DESC, mem.card_mst_id;
 
 -- Union of all evolved, awakened/super awakened memoria with translations
 DROP VIEW IF EXISTS combined_memoria_list CASCADE;
