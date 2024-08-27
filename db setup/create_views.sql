@@ -175,6 +175,7 @@ CREATE OR REPLACE VIEW combined_memoria_list AS
         quest_sk.RECOVERY_UP_MAGNIFICATION AS "quest_recovery_up_magnification",
         quest_sk.BUFFER_UP_MAGNIFICATION AS "quest_buffer_up_magnification",
         quest_sk.USE_SP_REDUCE_MAGNIFICATION AS "quest_use_sp_reduce_magnification",
+        quest_sk.json_params AS "quest_json_params",
         
         gvg_sk.ATTACK_MAGNIFICATION AS "gvg_attack_magnification",
         gvg_sk.RECOVERY_MAGNIFICATION AS "gvg_recovery_magnification",
@@ -190,6 +191,7 @@ CREATE OR REPLACE VIEW combined_memoria_list AS
         gvg_sk.RECOVERY_UP_MAGNIFICATION AS "gvg_recovery_up_magnification",
         gvg_sk.BUFFER_UP_MAGNIFICATION AS "gvg_buffer_up_magnification",
         gvg_sk.USE_SP_REDUCE_MAGNIFICATION AS "gvg_use_sp_reduce_magnification",
+        gvg_sk.json_params AS "gvg_json_params",
 
         auto_sk.ATTACK_MAGNIFICATION AS "auto_attack_magnification",
         auto_sk.RECOVERY_MAGNIFICATION AS "auto_recovery_magnification",
@@ -204,7 +206,8 @@ CREATE OR REPLACE VIEW combined_memoria_list AS
         auto_sk.ATTACK_UP_MAGNIFICATION AS "auto_attack_up_magnification",
         auto_sk.RECOVERY_UP_MAGNIFICATION AS "auto_recovery_up_magnification",
         auto_sk.BUFFER_UP_MAGNIFICATION AS "auto_buffer_up_magnification",
-        auto_sk.USE_SP_REDUCE_MAGNIFICATION AS "auto_use_sp_reduce_magnification"
+        auto_sk.USE_SP_REDUCE_MAGNIFICATION AS "auto_use_sp_reduce_magnification",
+        auto_sk.json_params AS "auto_json_params"
     FROM
     (
         SELECT 
