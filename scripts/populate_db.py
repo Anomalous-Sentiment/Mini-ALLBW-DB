@@ -178,6 +178,10 @@ def parse_skill_mst_list(target_dir, filename, dict_of_dicts):
                 # NOTE: There is also a possibility of overwriting if same key appears in both the skill dict AND the parameter_text_json dict
                 get_parameter_text_key_values(new_row, parameter_text_json, action)
 
+
+        # Add the entire json obj to the row to store in db
+        new_row['json_params'] = parameter_text_json
+
         parsed_skill_list.append(new_row)
 
     return parsed_skill_list
@@ -316,9 +320,9 @@ def main(supabase):
     parsed_super_awakening_list = parse_super_awakened_mst_list(mst_dir, 'getCardSuperAwakeningCardTypeMstList.json')
 
     # Insert into database
-    # response = upsert_into_table('unique_memoria', unique_card_list)
+    response = upsert_into_table('unique_memoria', unique_card_list)
     response = upsert_into_table('skills', parsed_skill_list)
-    # response = upsert_into_table('memoria', parsed_card_list)
-    # response = upsert_into_table('super_awakened_memoria', parsed_super_awakening_list)
+    response = upsert_into_table('memoria', parsed_card_list)
+    response = upsert_into_table('super_awakened_memoria', parsed_super_awakening_list)
 
 main(supabase)
