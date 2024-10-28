@@ -54,8 +54,8 @@ CREATE TABLE orders
     rarity SMALLINT,
     tactic_name VARCHAR,
     tactic_desc VARCHAR,
-    quest_skill_mst_id INT,
-    gvg_skill_mst_id INT,
+    quest_tactic_effect_mst_id INT,
+    gvg_tactic_effect_mst_id INT,
     limit_break_bonus_mst_id INT,
     base_phys_atk INT,
     base_phys_def INT,
@@ -67,6 +67,28 @@ CREATE TABLE orders
     max_mag_def INT,
     PRIMARY KEY (tactic_mst_id)
 );
+
+DROP TABLE IF EXISTS order_effects;
+CREATE TABLE order_effects
+(
+    tactic_effect_mst_id INT,
+    effect_name VARCHAR,
+    effect_desc VARCHAR,
+    sp SMALLINT,
+    tactic_type INT,
+    effect_group INT,
+    parameter_text JSON,
+    preparation_time SMALLINT,
+    effect_time SMALLINT,
+    duration_effect_type INT,
+    duration_effect_type_1 INT,
+    duration_effect_type_2 INT,
+    duration_effect_type_3 INT,
+    execute_effect_target INT,
+    execute_effect_variable INT,
+    PRIMARY KEY (tactic_effect_mst_id)
+);
+
 
 DROP TABLE IF EXISTS skills;
 CREATE TABLE skills
