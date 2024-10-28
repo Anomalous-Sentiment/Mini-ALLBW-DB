@@ -126,11 +126,13 @@ def parse_order_mst_list(target_dir, filename, dict_of_dicts):
         new_row['tactic_mst_id'] = order['tacticsMstId']
 
         new_row['en_tactic_name'] = dict_of_dicts['EN'].get(order['name'])
+        new_row['jp_tactic_name'] = order['name']
         new_row['cn_tactic_name'] = dict_of_dicts['CN'].get(order['name'])
         new_row['kr_tactic_name'] = dict_of_dicts['KR'].get(order['name'])
         new_row['tw_tactic_name'] = dict_of_dicts['TW'].get(order['name'])
 
         new_row['en_tactic_desc'] = dict_of_dicts['EN'].get(order['description'])
+        new_row['jp_tactic_desc'] = order['description']
         new_row['cn_tactic_desc'] = dict_of_dicts['CN'].get(order['description'])
         new_row['kr_tactic_desc'] = dict_of_dicts['KR'].get(order['description'])
         new_row['tw_tactic_desc'] = dict_of_dicts['TW'].get(order['description'])
@@ -161,11 +163,13 @@ def parse_order_effects_mst_list(target_dir, filename, dict_of_dicts):
         new_row['tactic_effect_mst_id'] = order['tacticsEffectMstId']
 
         new_row['en_effect_name'] = dict_of_dicts['EN'].get(order['name'])
+        new_row['jp_effect_name'] = order['name']
         new_row['cn_effect_name'] = dict_of_dicts['CN'].get(order['name'])
         new_row['kr_effect_name'] = dict_of_dicts['KR'].get(order['name'])
         new_row['tw_effect_name'] = dict_of_dicts['TW'].get(order['name'])
 
         new_row['en_effect_desc'] = dict_of_dicts['EN'].get(order['description'])
+        new_row['jp_effect_desc'] = order['description']
         new_row['cn_effect_desc'] = dict_of_dicts['CN'].get(order['description'])
         new_row['kr_effect_desc'] = dict_of_dicts['KR'].get(order['description'])
         new_row['tw_effect_desc'] = dict_of_dicts['TW'].get(order['description'])

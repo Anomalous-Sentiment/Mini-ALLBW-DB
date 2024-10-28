@@ -46,17 +46,19 @@ CREATE TABLE memoria
     PRIMARY KEY (card_mst_id)
 );
 
-DROP TABLE IF EXISTS orders;
+DROP TABLE IF EXISTS orders CASCADE;
 CREATE TABLE orders
 (
     tactic_mst_id INT,
     unique_id INT,
     rarity SMALLINT,
     en_tactic_name VARCHAR,
+    jp_tactic_name VARCHAR,
     cn_tactic_name VARCHAR,
     kr_tactic_name VARCHAR,
     tw_tactic_name VARCHAR,
     en_tactic_desc VARCHAR,
+    jp_tactic_desc VARCHAR,
     cn_tactic_desc VARCHAR,
     kr_tactic_desc VARCHAR,
     tw_tactic_desc VARCHAR,
@@ -74,15 +76,17 @@ CREATE TABLE orders
     PRIMARY KEY (tactic_mst_id)
 );
 
-DROP TABLE IF EXISTS order_effects;
+DROP TABLE IF EXISTS order_effects CASCADE;
 CREATE TABLE order_effects
 (
     tactic_effect_mst_id INT,
     en_effect_name VARCHAR,
+    jp_effect_name VARCHAR,
     cn_effect_name VARCHAR,
     kr_effect_name VARCHAR,
     tw_effect_name VARCHAR,
     en_effect_desc VARCHAR,
+    jp_effect_desc VARCHAR,
     cn_effect_desc VARCHAR,
     kr_effect_desc VARCHAR,
     tw_effect_desc VARCHAR,
