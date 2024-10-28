@@ -266,3 +266,29 @@ CREATE OR REPLACE VIEW gvg_magnification AS
     FROM skills gvg_sk
     INNER JOIN memoria mem ON mem.gvg_skill_mst_id = gvg_sk.skill_mst_id
     INNER JOIN unique_memoria u_mem ON u_mem.unique_id = mem.unique_id;
+
+
+-- Same as combined memoria list, but removes the evolved form of memoria IF they have an awakened or super awakened form
+DROP VIEW IF EXISTS maxed_memoria;
+CREATE OR REPLACE VIEW maxed_memoria AS
+    (
+        SELECT 
+            DISTINCT ON (com_memo.unique_id)
+            com_memo.*
+        FROM memoria mem 
+        INNER JOIN unique_memoria u_mem ON mem.unique_id = u_mem.unique_id
+        INNER JOIN combined_memoria_list com_memo ON com_memo.unique_id = u_mem.unique_id
+            WHERE NOT EXISTS (
+                SELECT 
+                    sub_super_mem.unique_id
+                FROM super_awakened_memoria_list sub_super_mem
+                WHERE sub_super_mem.unique_id = mem.unique_id
+        ) AND mem.awakened_card_type = 0
+        ORDER BY com_memo.unique_id, mem.rarity DESC, mem.card_mst_id
+    )
+    UNION ALL
+    (
+        SELECT *
+        FROM combined_memoria_list com2
+        WHERE com2.awakened IS TRUE OR com2.super_awakened IS TRUE
+    )
