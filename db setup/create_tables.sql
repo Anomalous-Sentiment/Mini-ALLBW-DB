@@ -46,6 +46,28 @@ CREATE TABLE memoria
     PRIMARY KEY (card_mst_id)
 );
 
+DROP TABLE IF EXISTS orders;
+CREATE TABLE orders
+(
+    tactic_mst_id INT,
+    unique_id INT,
+    rarity SMALLINT,
+    tactic_name VARCHAR,
+    tactic_desc VARCHAR,
+    quest_skill_mst_id INT,
+    gvg_skill_mst_id INT,
+    limit_break_bonus_mst_id INT,
+    base_phys_atk INT,
+    base_phys_def INT,
+    base_mag_atk INT,
+    base_mag_def INT,
+    max_phys_atk INT,
+    max_phys_def INT,
+    max_mag_atk INT,
+    max_mag_def INT,
+    PRIMARY KEY (tactic_mst_id)
+);
+
 DROP TABLE IF EXISTS skills;
 CREATE TABLE skills
 (
@@ -110,27 +132,19 @@ CREATE TABLE super_awakened_memoria
 );
 
 
-DROP TABLE IF EXISTS skill_types;
-CREATE TABLE skill_types
-(
-    skill_type SMALLINT,
-    skill_type_desc VARCHAR,    
-    PRIMARY KEY (skill_type)
-);
+-- DROP TABLE IF EXISTS skill_types;
+-- CREATE TABLE skill_types
+-- (
+--     skill_type SMALLINT,
+--     skill_type_desc VARCHAR,    
+--     PRIMARY KEY (skill_type)
+-- );
 
 
-DROP TABLE IF EXISTS card_types;
-CREATE TABLE card_types
-(
-    card_type SMALLINT,
-    card_type_name VARCHAR,    
-    PRIMARY KEY (card_type)
-);
-
-DROP TABLE IF EXISTS card_types;
-CREATE TABLE card_types
-(
-    card_type SMALLINT,
-    card_type_name VARCHAR,    
-    PRIMARY KEY (card_type)
-);
+-- DROP TABLE IF EXISTS card_types;
+-- CREATE TABLE card_types
+-- (
+--     card_type SMALLINT,
+--     card_type_name VARCHAR,    
+--     PRIMARY KEY (card_type)
+-- );
