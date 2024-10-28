@@ -291,4 +291,36 @@ CREATE OR REPLACE VIEW maxed_memoria AS
         SELECT *
         FROM combined_memoria_list com2
         WHERE com2.awakened IS TRUE OR com2.super_awakened IS TRUE
-    )
+    );
+
+
+DROP VIEW IF EXISTS combined_orders;
+CREATE OR REPLACE VIEW combined_orders AS
+    SELECT
+        DISTINCT ON (od.unique_id)
+        od.tactic_mst_id,
+        od.unique_id,
+        od.rarity,
+        od_eff.tactic_effect_mst_id,
+        od.en_tactic_name,
+        od.cn_tactic_name,
+        od.kr_tactic_name,
+        od.tw_tactic_name,
+        od.en_tactic_desc,
+        od.cn_tactic_desc,
+        od.kr_tactic_desc,
+        od.tw_tactic_desc,
+        od_eff.en_effect_name,
+        od_eff.cn_effect_name,
+        od_eff.kr_effect_name,
+        od_eff.tw_effect_name,
+        od_eff.en_effect_desc,
+        od_eff.cn_effect_desc,
+        od_eff.kr_effect_desc,
+        od_eff.tw_effect_desc,
+        od_eff.sp,
+        od_eff.json_params,
+        od_eff.preparation_time,
+        od_eff.effect_time
+    FROM orders od INNER JOIN order_effects od_eff ON od.gvg_tactic_effect_mst_id = od_eff.tactic_effect_mst_id
+    ORDER BY od.unique_id, rarity DESC;
