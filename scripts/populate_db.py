@@ -97,9 +97,9 @@ def parse_card_mst_list(target_dir, filename):
 
     return parsed_card_list
 
-def parse_skill_mst_list(target_dir):
-    parsed_skill_list = []
-    return parsed_skill_list
+# def parse_skill_mst_list(target_dir):
+#     parsed_skill_list = []
+#     return parsed_skill_list
 
 def batch(iterable, n=1):
     l = len(iterable)
@@ -115,6 +115,84 @@ def upsert_into_table(table_name, rows):
             .execute()
         )
     return response
+
+def parse_order_mst_list(target_dir, filename, dict_of_dicts):
+    parsed_order_list = []
+    # Get the card mst list
+    order_list = read_json(target_dir, filename)
+    for order in order_list:
+
+        new_row = {}
+        new_row['tactic_mst_id'] = order['tacticsMstId']
+
+        new_row['en_tactic_name'] = dict_of_dicts['EN'].get(order['name'])
+        new_row['cn_tactic_name'] = dict_of_dicts['CN'].get(order['name'])
+        new_row['kr_tactic_name'] = dict_of_dicts['KR'].get(order['name'])
+        new_row['tw_tactic_name'] = dict_of_dicts['TW'].get(order['name'])
+
+        new_row['en_tactic_desc'] = dict_of_dicts['EN'].get(order['description'])
+        new_row['cn_tactic_desc'] = dict_of_dicts['CN'].get(order['description'])
+        new_row['kr_tactic_desc'] = dict_of_dicts['KR'].get(order['description'])
+        new_row['tw_tactic_desc'] = dict_of_dicts['TW'].get(order['description'])
+
+        new_row['unique_id'] = order['uniqueId']
+        new_row['rarity'] = order['rarity']
+        new_row['limit_break_bonus_mst_id'] = order['limitBreakBonusMstId']
+        new_row['quest_tactic_effect_mst_id'] = order['questTacticsEffectMstId']
+        new_row['gvg_tactic_effect_mst_id'] = order['gvgTacticsEffectMstId']
+        new_row['base_phys_atk'] = order['basePhysicalAttack']
+        new_row['base_mag_atk'] = order['baseMagicalAttack']
+        new_row['base_phys_def'] = order['basePhysicalDefense']
+        new_row['base_mag_def'] = order['baseMagicalDefense']
+        new_row['max_phys_atk'] = order['maxPhysicalAttack']
+        new_row['max_mag_atk'] = order['maxMagicalAttack']
+        new_row['max_phys_def'] = order['maxPhysicalDefense']
+        new_row['max_mag_def'] = order['maxMagicalDefense']
+
+        parsed_order_list.append(new_row)
+    return parsed_order_list
+
+def parse_order_effects_mst_list(target_dir, filename, dict_of_dicts):
+    parsed_order_effects_list = []
+    # Get the card mst list
+    order_list = read_json(target_dir, filename)
+    for order in order_list:
+        new_row = {}
+        new_row['tactic_effect_mst_id'] = order['tacticsEffectMstId']
+
+        new_row['en_effect_name'] = dict_of_dicts['EN'].get(order['name'])
+        new_row['cn_effect_name'] = dict_of_dicts['CN'].get(order['name'])
+        new_row['kr_effect_name'] = dict_of_dicts['KR'].get(order['name'])
+        new_row['tw_effect_name'] = dict_of_dicts['TW'].get(order['name'])
+
+        new_row['en_effect_desc'] = dict_of_dicts['EN'].get(order['description'])
+        new_row['cn_effect_desc'] = dict_of_dicts['CN'].get(order['description'])
+        new_row['kr_effect_desc'] = dict_of_dicts['KR'].get(order['description'])
+        new_row['tw_effect_desc'] = dict_of_dicts['TW'].get(order['description'])
+
+        new_row['sp'] = order['sp']
+        new_row['tactic_type'] = order['type']
+        new_row['effect_group'] = order['group']
+        new_row['preparation_time'] = order['preparationTime']
+        new_row['effect_time'] = order['effectTime']
+        new_row['duration_effect_type'] = order['durationEffectType']
+        new_row['duration_effect_type_1'] = order['executeEffectType1']
+        new_row['duration_effect_type_2'] = order['executeEffectType2']
+        new_row['duration_effect_type_3'] = order['executeEffectType3']
+        new_row['execute_effect_target'] = order['executeEffectTarget']
+        new_row['execute_effect_variable'] = order['executeEffectVariable']
+
+
+        if order['parameterText']:
+            # Get the parameters json if it exists
+            parameter_text_json = json.loads(order['parameterText'])
+        else:
+            parameter_text_json = {}
+
+        new_row['json_params'] = parameter_text_json
+
+        parsed_order_effects_list.append(new_row)
+    return parsed_order_effects_list
 
 def parse_skill_mst_list(target_dir, filename, dict_of_dicts):
     parsed_skill_list = []
@@ -316,13 +394,21 @@ def main(supabase):
     # remove the name key from dicts in the parsed card list
     parsed_card_list = [{k: v for k, v in d.items() if k != 'name'} for d in parsed_card_list]
 
-    # Get the super wakened card data
+    # Get the super awakened card data
     parsed_super_awakening_list = parse_super_awakened_mst_list(mst_dir, 'getCardSuperAwakeningCardTypeMstList.json')
+
+    # Get mst tactics list (orders)
+    parsed_order_list = parse_order_mst_list(mst_dir, 'getTacticsMstList.json', dict_of_dicts)
+
+    # Get mst tactic effects list (order effects)
+    parsed_order_effects_list = parse_order_effects_mst_list(mst_dir, 'getTacticsEffectMstList.json', dict_of_dicts)
 
     # Insert into database
     response = upsert_into_table('unique_memoria', unique_card_list)
     response = upsert_into_table('skills', parsed_skill_list)
     response = upsert_into_table('memoria', parsed_card_list)
     response = upsert_into_table('super_awakened_memoria', parsed_super_awakening_list)
+    response = upsert_into_table('orders', parsed_order_list)
+    response = upsert_into_table('order_effects', parsed_order_effects_list)
 
 main(supabase)

@@ -89,7 +89,7 @@ CREATE TABLE order_effects
     sp SMALLINT,
     tactic_type INT,
     effect_group INT,
-    parameter_text JSON,
+    json_params JSON,
     preparation_time SMALLINT,
     effect_time SMALLINT,
     duration_effect_type INT,
